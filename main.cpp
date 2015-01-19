@@ -7,10 +7,10 @@
 #include <sstream>
 #include <mutex>
 #include <iomanip>
-#include <curl/curl.h>
 #include "picosha.h"
 #include "donna.h"
 #include "uint256_t.h"
+#include "happyhttp.h"
 
 
 static std::mutex countMutex;
@@ -159,36 +159,35 @@ int submit_share(const std::string &address, const std::string &result)
     
     char* str = (char*)malloc(sizeof(char)*255);
     sprintf(str,"&key=%s&address=%s",result.c_str(),address.c_str());
-    CURL *curl;
-    CURLcode res;
-    /* In windows, this will init the winsock stuff */
-    curl_global_init(CURL_GLOBAL_ALL);
-    /* get a curl handle */
-    curl = curl_easy_init();
-    if(curl) {
-        /* First set the URL that is about to receive our POST. This URL can
-        just as well be a https:// URL if that is what should receive the
-        data. */
-        curl_easy_setopt(curl, CURLOPT_URL, "http://bitprobing.com/push");
-        /* Now specify the POST data */
-        //curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, str);
-        /* Perform the request, res will get the return code */
-        res = curl_easy_perform(curl);
-        /* Check for errors */
-        if(res != CURLE_OK)
-            {}
-        else
-        {
-            ret = 1;
-        }
 
-        /* always cleanup */
-        curl_easy_cleanup(curl);
+    
+    
+    const char* headers[] = 
+    {
+        "Connection", "close",
+        "Content-type", "application/x-www-form-urlencoded",
+        "Accept", "text/plain",
+        0
+    };
+
+    try{
+        happyhttp::Connection conn( "54.191.123.177", 80 );
+        conn.request( "POST",
+                "/push",
+                headers,
+                (const unsigned char*)str,
+                strlen(str) );
+
+        while( conn.outstanding() )
+            conn.pump();
+         
+        ret = 1;
     }
-    curl_global_cleanup();
-    free(str);
+    catch( happyhttp::Wobbly& e )
+    {
+        fprintf(stderr, "Exception:\n%s\n", e.what() );
+    }
+    free(str); 
     return ret;
 }
 
