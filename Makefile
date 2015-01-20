@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-I.
-LDFLAGS=-static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -static-libstdc++ -static-libgcc  
+CFLAGS=-I. -m64
+LDFLAGS=-static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -static-libstdc++ -static-libgcc -m64
 %.o: %.cpp $(DEPS)
 	$(CC) -O2 -Wall -std=c++0x -c -o $@ $< $(CFLAGS)
 
