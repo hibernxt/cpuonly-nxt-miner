@@ -11,7 +11,10 @@
 #include "donna.h"
 #include "uint256_t.h"
 #include "happyhttp.h"
-
+#ifdef __MINGW32__
+    #include <winsock2.h>
+    #define vsnprintf _vsnprintf
+#endif
 
 static std::mutex countMutex;
 static std::mutex resultMutex;
@@ -47,6 +50,10 @@ std::string get_array(uint8_t* public_key){
 
 void work()
 {
+#ifdef __MINGW32__
+    WSADATA wsaData;
+    WSAStartup(0x202, &wsaData);
+#endif
     static const unsigned int tries = 1;
 
     uint32_t seed32 = static_cast<uint32_t>(time(0)) ^ static_cast<uint32_t>(std::hash<std::thread::id>()(std::this_thread::get_id()));

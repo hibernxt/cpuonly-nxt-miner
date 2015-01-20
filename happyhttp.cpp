@@ -27,7 +27,7 @@
 
 #include "happyhttp.h"
 
-#ifndef WIN32
+#ifndef __MINGW32__
 //	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
@@ -37,7 +37,7 @@
  	#include <unistd.h>
 #endif
 
-#ifdef WIN32
+#ifdef __MINGW32__
 	#include <winsock2.h>
 	#define vsnprintf _vsnprintf
 #endif
@@ -61,7 +61,7 @@ using namespace std;
 namespace happyhttp
 {
 
-#ifdef WIN32
+#ifdef __MINGW32__
 const char* GetWinsockErrorString( int err );
 #endif
 
@@ -74,7 +74,7 @@ const char* GetWinsockErrorString( int err );
 
 void BailOnSocketError( const char* context )
 {
-#ifdef WIN32
+#ifdef __MINGW32__
 
 	int e = WSAGetLastError();
 	const char* msg = GetWinsockErrorString( e );
@@ -85,7 +85,7 @@ void BailOnSocketError( const char* context )
 }
 
 
-#ifdef WIN32
+#ifdef __MINGW32__
 
 const char* GetWinsockErrorString( int err )
 {
@@ -276,7 +276,7 @@ void Connection::connect()
 
 void Connection::close()
 {
-#ifdef WIN32
+#ifdef __MINGW32__
 	if( m_Sock >= 0 )
 		::closesocket( m_Sock );
 #else
@@ -416,7 +416,7 @@ void Connection::send( const unsigned char* buf, int numbytes )
 
 	while( numbytes > 0 )
 	{
-#ifdef WIN32
+#ifdef __MINGW32__
 		int n = ::send( m_Sock, (const char*)buf, numbytes, 0 );
 #else
 		int n = ::send( m_Sock, buf, numbytes, 0 );
