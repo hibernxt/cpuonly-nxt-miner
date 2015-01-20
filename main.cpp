@@ -74,6 +74,13 @@ void work()
         if(i>0){
             e_minus_one[i] = (rand()*65515) % 256;
             e[i] = e_minus_one[i];
+
+            if(i==31){
+                e_minus_one[31] &= 127;
+                e_minus_one[31] |= 64;
+                e[31] &= 127;
+                e[31] |= 64;
+            }
         }else{
             e_minus_one[i]=1;
             e[i]=2;
